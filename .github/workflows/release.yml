@@ -1,0 +1,48 @@
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Get bump version
+        id: bump_label
+        uses: SamirMarin/get-labels-action@v0.0.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          label_key: bump
+          label_value_order: "patch,minor,major,ignore"
+          default_label_value: patch
+
+      - name: Get tag prefix
+        id: tag_prefix
+        uses: SamirMarin/get-labels-action@v0.0.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          label_key: version
+          default_label_value: v
+
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: ${{ steps.bump_label.outputs.label_value }}
+          dry_run: ${{ github.event_name == 'pull_request' }}
+          tag_prefix: ${{ steps.tag_prefix.outputs.label_value }}
+
+      - name: Comment on PR
+        if: ${{ github.event_name == 'pull_request' && steps.tag_version.outputs.new_tag != '' }}
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            **Next Release:** ${{ steps.tag_version.outputs.new_tag }}
+
+      - name: Create a GitHub release
+        uses: ncipollo/release-action@v1.14.0
+        if: ${{ github.event_name != 'pull_request' && steps.tag_version.outputs.new_tag != '' }}
+        with:
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
