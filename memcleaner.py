@@ -43,11 +43,14 @@ def read_local_version() -> str:
 
 def get_latest_release(timeout: float = 10) -> Tuple[Optional[str], Optional[List[dict]]]:
     url = "https://api.github.com/repos/PatrickJnr/StreamLitMemCleaner/releases/latest"
+    headers = {
+        "Accept": "application/vnd.github.v3+json",
+    }
     try:
-        response = requests.get(url, timeout=timeout)
-        response.raise_for_status()  
+        response = requests.get(url, headers=headers, timeout=timeout)
+        response.raise_for_status()  # Raise an HTTPError for bad responses
         release_data = response.json()
-        return release_data['tag_name'], release_data['assets']
+        return release_data.get('tag_name'), release_data.get('assets')
     except requests.RequestException as e:
         st.error(f"Failed to fetch latest release: {e}")
         return None, None
