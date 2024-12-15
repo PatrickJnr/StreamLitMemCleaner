@@ -1,0 +1,21 @@
+.stButton > button {
+    background-color: #9146FF;  /* Twitch Purple */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+.stButton > button:hover {
+    background-color: #7B3EBE;  /* Darker purple */
+}
+.header {
+    text-align: center;
+    font-size: 32px;
+    font-weight: bold;
+    color: #FFFFFF;  /* White */
+}
+.stMarkdown {
+    color: #FFFFFF;  /* White text for markdown */
+}
