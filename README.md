@@ -23,7 +23,6 @@ https://github.com/user-attachments/assets/aa79d784-5d22-470e-a597-fe407e9e069d
 - **Historical Data Visualization**:
   - Tracks memory usage over time.
   - Visualizes data in an easy-to-read chart.
-- **Automatic Updates**: Retrieves the latest version of the application directly from GitHub.
 - **Integration with EmptyStandbyList.exe**: Uses the executable to perform memory cleanup tasks.
 - **Custom CSS Styling**: Personalize the application UI with external CSS files.
 
@@ -78,9 +77,6 @@ https://github.com/user-attachments/assets/aa79d784-5d22-470e-a597-fe407e9e069d
 - View and analyze historical memory usage through tables and charts.
 - Delete memory history when it reaches a specified maximum row count.
 
-### Updating the Application
-- Compare your local version with the latest release on GitHub.
-- Update the app directly from within the UI if an update is available.
 
 ---
 
