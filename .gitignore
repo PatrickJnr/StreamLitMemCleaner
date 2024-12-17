@@ -1,3 +1,44 @@
+# Python bytecode files
+__pycache__/
+*.py[cod]
+*.pyo
 
+# Virtual environment folders
+venv/
+env/
+.venv/
+.env/
+
+# Distribution/packaging
+build/
+dist/
+*.egg-info/
+
+# PyInstaller
+*.spec
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Pytest
+*.log
+*.coverage
+*.hypothesis/
+
+# IDE settings
+.vscode/
+.idea/
+
+# Mypy
+.mypy_cache/
+
+# Python environment configurations
+Pipfile.lock
+poetry.lock
+
+# Other common folders/files
+*.bak
+*.swp
+*.swo
 EmptyStandbyList.exe
 data/memory_usage.csv
