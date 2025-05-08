@@ -1,3 +1,11 @@
+## [v1.0.3] - 2024-12-21
+
+### Added
+- Added a confirmation dialog before deleting memory usage history.
+- Improved error handling for file operations.
+- Added a refresh button for system information.
+- Improved layout using columns.
+
 ## [v1.0.2] - 2024-12-16
 
 ### Added

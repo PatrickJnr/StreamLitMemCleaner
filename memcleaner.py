@@ -10,7 +10,9 @@ import requests
 import streamlit as st
 
 # Streamlit page setup
-st.set_page_config(page_title="Memory Cleanup Utility", page_icon="🔧")
+st.set_page_config(
+    page_title="Memory Cleanup Utility",
+    page_icon="🔧",)
 
 # Constants
 DATA_DIR = "data"
@@ -26,16 +28,6 @@ os.makedirs(DATA_DIR, exist_ok=True)
 st.title("Memory Cleanup Utility")
 
 # Utility functions
-def collect_ram_data() -> dict:
-    """Collect current RAM usage data."""
-    mem = psutil.virtual_memory()
-    return {
-        'Time': time.strftime("%H:%M:%S"),
-        'Used': mem.used / (1024**3),
-        'Available': mem.available / (1024**3),
-        'Percent': mem.percent
-    }
-
 def run_command(command: List[str]) -> Tuple[str, int]:
     """Run a system command and return its output and return code."""
     try:
@@ -52,7 +44,7 @@ def format_memory_value(memory_mb: float) -> str:
     else:
         return f"{memory_mb / 1024:.2f} GB"
 
-def get_memory_info() -> Tuple[float, float, float, float]:
+def get_system_info() -> Tuple[float, float, float, float]:
     """Get the system's memory information."""
     try:
         mem = psutil.virtual_memory()
@@ -61,7 +53,7 @@ def get_memory_info() -> Tuple[float, float, float, float]:
         used_memory = mem.used / (1024**3)
         return total_memory, free_memory_gb, 0.0, used_memory  # Set cached to 0.0
     except Exception as e:
-        st.error(f"Error fetching memory info: {e}")
+        st.error(f"Error fetching system info: {e}")
         return 0.0, 0.0, 0.0, 0.0
 
 def read_local_version() -> Optional[str]:
@@ -98,7 +90,7 @@ def get_latest_release(timeout: float = 10) -> Tuple[Optional[str], Optional[str
         return None, None, None
 
 def plot_memory_history(data: pd.DataFrame):
-    """Plot the memory cleanup history using a line chart."""
+    """Plot the memory and CPU usage history using a line chart."""
     try:
         data["Timestamp"] = pd.to_datetime(data["Timestamp"])
         data.set_index("Timestamp", inplace=True)
@@ -142,82 +134,114 @@ def main():
     if not download_exe():
         return
 
-    # Define cleanup commands
-    commands = {
-        "modifiedpagelist": "Clear modified page list",
-        "standbylist": "Clear standby list",
-        "priority0standbylist": "Clear priority 0 standby list",
-        "workingsets": "Clear working sets",
-    }
+    # Sidebar for navigation
+    st.sidebar.title("Navigation")
+    page = st.sidebar.radio("Go to", ["Home", "Updates", "Help", "Changelog"])
 
-    # Select cleanup commands
-    selected_commands = st.multiselect("Select Cleanup Commands", list(commands.keys()), default=list(commands.keys()))
+    if page == "Home":
+        # Display system information
+        st.subheader("System Information")
+        system_info_placeholder = st.empty()
 
-    if st.button("Start Cleanup"):
-        if len(selected_commands) == len(commands):
-            st.warning("You have selected all cleanup options. Your system may lock up briefly during the cleanup process.")
+        def display_system_info():
+            total_memory, free_memory_before, _, used_memory = get_system_info()
+            system_info_placeholder.markdown(f"""
+                **Total Memory:** {format_memory_value(total_memory * 1024)}
+                **Free Memory:** {format_memory_value(free_memory_before)}
+                **Used Memory:** {format_memory_value(used_memory * 1024)}
+            """)
 
-        with st.spinner('Cleaning up memory...'):
-            total_memory, free_memory_before, _, _ = get_memory_info()
-            st.write(f"Total Memory: {format_memory_value(total_memory * 1024)}")
-            st.write(f"Free Memory before cleanup: {format_memory_value(free_memory_before)}")
+        display_system_info()
 
-            progress_bar = st.progress(0)
-            for i, cmd in enumerate(selected_commands):
-                st.write(f"Executing EmptyStandbyList for {commands[cmd]}...")
-                output, returncode = run_command([EXE_PATH, cmd])
-                if returncode == 0:
-                    progress_bar.progress((i + 1) / len(selected_commands))
-                else:
-                    st.error(f"Error occurred while executing {cmd}. Output: {output}")
-                    break
+        if st.button("Refresh System Information"):
+            display_system_info()
 
-            _, free_memory_after, _, _ = get_memory_info()
-            st.write(f"Free Memory after cleanup: {format_memory_value(free_memory_after)}")
+        # Define cleanup commands
+        commands = {
+            "modifiedpagelist": "Clear modified page list",
+            "standbylist": "Clear standby list",
+            "priority0standbylist": "Clear priority 0 standby list",
+            "workingsets": "Clear working sets",
+        }
 
-            freed_memory = free_memory_after - free_memory_before
-            st.write(f"Freed memory: {format_memory_value(abs(freed_memory))}")
+        # Select cleanup commands
+        selected_commands = st.multiselect("Select Cleanup Commands", list(commands.keys()), default=list(commands.keys()))
 
-            new_data = pd.DataFrame({
-                "Timestamp": [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")],
-                "Free Memory Before": [f"{free_memory_before:.2f}"],
-                "Free Memory After": [f"{free_memory_after:.2f}"],
-                "Freed Memory": [f"{abs(freed_memory):.2f}"],
-            })
+        if st.button("Start Cleanup"):
+            if len(selected_commands) == len(commands):
+                st.warning("You have selected all cleanup options. Your system may lock up briefly during the cleanup process.")
 
-            if os.path.exists(MEMORY_FILE_PATH):
+            with st.spinner('Cleaning up memory...'):
+                total_memory, free_memory_before, _, _ = get_system_info()
+                st.write(f"Total Memory: {format_memory_value(total_memory * 1024)}")
+                st.write(f"Free Memory before cleanup: {format_memory_value(free_memory_before)}")
+
+                progress_bar = st.progress(0)
+                for i, cmd in enumerate(selected_commands):
+                    st.write(f"Executing EmptyStandbyList for {commands[cmd]}...")
+                    output, returncode = run_command([EXE_PATH, cmd])
+                    if returncode == 0:
+                        progress_bar.progress((i + 1) / len(selected_commands))
+                    else:
+                        st.error(f"Error occurred while executing {cmd}. Output: {output}")
+                        break
+
+                _, free_memory_after, _, _ = get_system_info()
+                st.write(f"Free Memory after cleanup: {format_memory_value(free_memory_after)}")
+
+                freed_memory = free_memory_after - free_memory_before
+                st.write(f"Freed memory: {format_memory_value(abs(freed_memory))}")
+
+                new_data = pd.DataFrame({
+                    "Timestamp": [datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")],
+                    "Free Memory Before": [f"{free_memory_before:.2f}"],
+                    "Free Memory After": [f"{free_memory_after:.2f}"],
+                    "Freed Memory": [f"{abs(freed_memory):.2f}"]
+                })
+
+                try:
+                    if os.path.exists(MEMORY_FILE_PATH):
+                        memory_df = pd.read_csv(MEMORY_FILE_PATH)
+                        memory_df = pd.concat([memory_df, new_data], ignore_index=True)
+                    else:
+                        memory_df = new_data
+
+                    memory_df.to_csv(MEMORY_FILE_PATH, index=False)
+                except Exception as e:
+                    st.error(f"Error saving memory usage history: {e}")
+
+        # Memory usage history
+        st.subheader("Memory Usage History")
+        if os.path.exists(MEMORY_FILE_PATH):
+            try:
                 memory_df = pd.read_csv(MEMORY_FILE_PATH)
-                memory_df = pd.concat([memory_df, new_data], ignore_index=True)
-            else:
-                memory_df = new_data
+                st.dataframe(memory_df)
 
-            memory_df.to_csv(MEMORY_FILE_PATH, index=False)
+                if st.button("Plot Memory Usage"):
+                    if not memory_df.empty:
+                        plot_memory_history(memory_df)
+                    else:
+                        st.warning("No data available to plot.")
 
-    # Memory usage history
-    st.subheader("Memory Usage History")
-    if os.path.exists(MEMORY_FILE_PATH):
-        try:
-            memory_df = pd.read_csv(MEMORY_FILE_PATH)
-            st.dataframe(memory_df)
+                if st.button("Delete Memory Usage History"):
+                    st.session_state.confirm_delete = True
 
-            if st.button("Plot Memory Usage"):
-                if not memory_df.empty:
-                    plot_memory_history(memory_df)
-                else:
-                    st.warning("No data available to plot.")
+                if st.session_state.get("confirm_delete"):
+                    if st.button("Confirm Delete"):
+                        try:
+                            os.remove(MEMORY_FILE_PATH)
+                            st.success("Memory usage history deleted successfully.")
+                            del st.session_state.confirm_delete
+                        except Exception as e:
+                            st.error(f"Error deleting memory usage history: {e}")
+                    if st.button("Cancel"):
+                        del st.session_state.confirm_delete
+            except Exception as e:
+                st.error(f"Error reading memory history: {e}")
+        else:
+            st.write("No memory usage history available.")
 
-            if st.button("Delete Memory Usage History"):
-                os.remove(MEMORY_FILE_PATH)
-                st.success("Memory usage history deleted successfully.")
-        except Exception as e:
-            st.error(f"Error reading memory history: {e}")
-    else:
-        st.write("No memory usage history available.")
-
-    # Create tabs for the application
-    tab2, tab3, tab4 = st.tabs(["Updates", "Help", "Changelog"])
-
-    with tab2:
+    elif page == "Updates":
         st.write("**Version Check**")
         st.markdown(f"**Local Version:** {local_version}")
 
@@ -232,7 +256,7 @@ def main():
             else:
                 st.error("Failed to check for updates.")
 
-    with tab3:
+    elif page == "Help":
         st.write("**Help Section**")
         st.write(
             """
@@ -247,7 +271,7 @@ def main():
             """
         )
 
-    with tab4:
+    elif page == "Changelog":
         st.markdown(load_changelog())
 
     # Footer
