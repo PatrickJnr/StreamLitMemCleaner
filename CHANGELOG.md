@@ -33,19 +33,6 @@
 - Centralized string formatting
 - Added error handling
 
-## [v1.0.4] - 08 May 2025
-
-### Refactor
-  - Restructure app with OOP principles and improve code organization
-  - Implement class-based architecture for better separation of concerns
-  - Create dedicated UI components for each page
-  - Centralize configuration with structured dictionaries
-  - Enhance error handling throughout the application
-  - Improve memory information display with additional metrics
-
-### Changed
-- Updated changelog date format to Day Month Year for better readability
-
 ## [v1.0.3] - 21 December 2024
 
 ### Added
