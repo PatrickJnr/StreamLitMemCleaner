@@ -1,4 +1,52 @@
-## [v1.0.3] - 2024-12-21
+## [v1.0.4] - 08 May 2025
+
+### Added
+- Logging system with file and console handlers
+- Type safety with enums and type definitions
+- Path handling with pathlib
+- Session state management
+- Memory history pagination and sorting
+- Color-coded success messages
+- Help documentation with tabs
+- Version display in footer
+- Critical error handling
+
+### Changed
+- Changelog date format to Day Month Year
+- Enhanced error messages and feedback
+- Memory usage display with percentage formatting
+- Improved cleanup command handling
+- Enhanced update checking interface
+- Enhanced changelog page with better error handling
+- Simplified Page enum values
+
+### Refactor
+- Restructured app with OOP principles
+  - Class-based architecture for separation of concerns
+  - Dedicated UI components
+  - Centralized configuration
+  - Enhanced error handling
+  - Improved memory information display
+- Split large functions into smaller methods
+- Added type hints and documentation
+- Improved code organization with mixins
+- Centralized string formatting
+- Added error handling
+
+## [v1.0.4] - 08 May 2025
+
+### Refactor
+  - Restructure app with OOP principles and improve code organization
+  - Implement class-based architecture for better separation of concerns
+  - Create dedicated UI components for each page
+  - Centralize configuration with structured dictionaries
+  - Enhance error handling throughout the application
+  - Improve memory information display with additional metrics
+
+### Changed
+- Updated changelog date format to Day Month Year for better readability
+
+## [v1.0.3] - 21 December 2024
 
 ### Added
 - Added a confirmation dialog before deleting memory usage history.
@@ -6,7 +54,7 @@
 - Added a refresh button for system information.
 - Improved layout using columns.
 
-## [v1.0.2] - 2024-12-16
+## [v1.0.2] - 16 December 2024
 
 ### Added
 - Centralized constants for paths and URLs to simplify maintenance.
